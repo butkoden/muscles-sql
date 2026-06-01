@@ -77,3 +77,7 @@ def generate_resource(name: str, sql: bool):
     content = f"class {name.title().replace('_', '')}Resource:\n    sql_enabled = {sql}\n"
     target.write_text(content, encoding="utf-8")
     click.echo(str(target))
+
+
+if __name__ == "__main__":
+    main()

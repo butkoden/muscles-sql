@@ -9,3 +9,4 @@ Muscles SQL is a dedicated SQL data layer:
 - `migrations.py`: Alembic-compatible bootstrap
 - `inspect.py`: inspect/doctor contract
 - `cli.py`: AI-first commands (`doctor`, `inspect`, `migrate`, `generate --sql`)
+- compatible with core DI optimization (`muscles#36`): sql CLI/runtime path has no behavior regression.
