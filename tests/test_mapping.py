@@ -27,3 +27,4 @@ def test_map_model_builds_table():
     assert "id" in table.columns
     assert "name" in table.columns
     assert list(table.primary_key.columns)[0].name == "id"
+    assert table.columns["id"].autoincrement is True

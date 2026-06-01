@@ -32,7 +32,19 @@ def map_model(model_cls: type, table_name: str | None = None) -> Table:
         sql_type = _resolve_type(field_type)
         is_pk = bool(getattr(field_def, "primary_key", False))
         nullable = bool(getattr(field_def, "nullable", not is_pk))
-        columns.append(Column(field_name, sql_type, primary_key=is_pk, nullable=nullable))
+        autoincrement = bool(
+            getattr(field_def, "autoincrement", False)
+            or (is_pk and sql_type is Integer)
+        )
+        columns.append(
+            Column(
+                field_name,
+                sql_type,
+                primary_key=is_pk,
+                nullable=nullable,
+                autoincrement=autoincrement,
+            )
+        )
 
     if not columns:
         raise ValueError(f"No mappable columns found in model {model_cls.__name__}")
