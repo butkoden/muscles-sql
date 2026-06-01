@@ -6,6 +6,8 @@ def test_init_migrations(tmp_path):
     root = init_migrations(str(tmp_path / "migrations"))
     assert root.exists()
     assert (root / "versions").exists()
+    assert (root / "env.py").exists()
+    assert (root / "script.py.mako").exists()
 
 
 def test_migration_commands_require_alembic(monkeypatch):

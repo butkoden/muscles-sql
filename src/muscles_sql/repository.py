@@ -118,14 +118,27 @@ class SqlRepository:
     def upsert(self, row: dict, conflict_fields: list[str]):
         from sqlalchemy import inspect
         from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+        from sqlalchemy.exc import OperationalError
 
         dialect_name = inspect(self.session.bind).dialect.name
         if dialect_name == "sqlite":
             stmt = sqlite_insert(self.table).values(**row)
             update_data = {k: v for k, v in row.items() if k not in conflict_fields}
             stmt = stmt.on_conflict_do_update(index_elements=conflict_fields, set_=update_data)
-            self.session.execute(stmt)
-            return 1
+            try:
+                self.session.execute(stmt)
+                return 1
+            except OperationalError:
+                # Fallback for tables where conflict_fields are not backed by unique/pk constraints.
+                pass
+
+        filters = {field: row[field] for field in conflict_fields if field in row}
+        if filters:
+            existing = self.find(filters=filters, limit=1)
+            if existing:
+                pk_col = list(self.table.primary_key.columns)[0].name
+                pk_val = existing[0][pk_col]
+                return self.update(pk_val, {k: v for k, v in row.items() if k != pk_col})
 
         pk_col = list(self.table.primary_key.columns)[0].name
         pk_val = row.get(pk_col)

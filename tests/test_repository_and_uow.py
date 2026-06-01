@@ -105,6 +105,20 @@ def test_repository_upsert_sqlite():
         assert repo.get(1)["name"] == "Butko"
 
 
+def test_repository_upsert_fallback_uses_conflict_fields():
+    manager = EngineManager(DatabaseConfig(url="sqlite:///:memory:"))
+    table, metadata = _users_table()
+    metadata.create_all(manager.engine)
+    with UnitOfWork(manager.session_factory) as uow:
+        repo = SqlRepository(uow.session, table)
+        repo.create({"id": 1, "name": "Denis"})
+        # conflict is on name (non-PK). Fallback path should update existing row.
+        repo.upsert({"id": 2, "name": "Denis"}, conflict_fields=["name"])
+        rows = repo.find({"name": "Denis"}, limit=10)
+        assert len(rows) == 1
+        assert rows[0]["id"] == 1
+
+
 def test_uow_nested_transaction_and_retry():
     manager = EngineManager(DatabaseConfig(url="sqlite:///:memory:"))
     table, metadata = _users_table()
