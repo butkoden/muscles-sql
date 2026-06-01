@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from click.testing import CliRunner
 
@@ -23,3 +24,6 @@ def test_migrate_init_and_generate_sql(tmp_path):
         assert res.exit_code == 0
         gen = runner.invoke(main, ["generate", "resource", "booking", "--sql"])
         assert gen.exit_code == 0
+        generated = Path("generated") / "booking.py"
+        assert generated.exists()
+        assert "sql_enabled = True" in generated.read_text(encoding="utf-8")

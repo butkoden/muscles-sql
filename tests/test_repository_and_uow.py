@@ -32,3 +32,21 @@ def test_repository_crud_and_uow_commit():
         assert row2["name"] == "Butko"
         repo.delete(1)
         assert repo.get(1) is None
+
+
+def test_repository_find_count_exists():
+    manager = EngineManager(DatabaseConfig(url="sqlite:///:memory:"))
+    table, metadata = _users_table()
+    metadata.create_all(manager.engine)
+
+    with UnitOfWork(manager.session_factory) as uow:
+        repo = SqlRepository(uow.session, table)
+        repo.create({"id": 1, "name": "Denis"})
+        repo.create({"id": 2, "name": "Ira"})
+        repo.create({"id": 3, "name": "Denis"})
+
+        found = repo.find({"name": "Denis"})
+        assert len(found) == 2
+        assert repo.count({"name": "Denis"}) == 2
+        assert repo.exists({"name": "Ira"}) is True
+        assert repo.exists({"name": "Missing"}) is False
