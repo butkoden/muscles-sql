@@ -32,7 +32,10 @@ def _sa():
 
 def _resolve_type(column_type: Any):
     sa = _sa()
-    name = getattr(column_type, "__name__", str(column_type))
+    if isinstance(column_type, type):
+        name = column_type.__name__
+    else:
+        name = getattr(column_type, "__class__", type(column_type)).__name__
     return sa.get(TYPE_MAP.get(name, "String"), sa["String"])
 
 
