@@ -8,3 +8,5 @@ def test_engine_manager_and_inspect_sqlite():
     report = inspect_sql_layer(manager)
     assert report["status"] == "ok"
     assert report["dialect"] == "sqlite"
+    assert isinstance(report["latency_ms"], float)
+    assert isinstance(report["tables"], list)

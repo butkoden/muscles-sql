@@ -27,3 +27,23 @@ def test_migrate_init_and_generate_sql(tmp_path):
         generated = Path("generated") / "booking.py"
         assert generated.exists()
         assert "sql_enabled = True" in generated.read_text(encoding="utf-8")
+
+
+def test_migrate_v2_commands(monkeypatch):
+    from muscles_sql import cli as cli_module
+
+    calls = []
+
+    monkeypatch.setattr("muscles_sql.migrations.revision", lambda **kwargs: calls.append(("revision", kwargs)))
+    monkeypatch.setattr("muscles_sql.migrations.upgrade", lambda **kwargs: calls.append(("upgrade", kwargs)))
+    monkeypatch.setattr("muscles_sql.migrations.downgrade", lambda **kwargs: calls.append(("downgrade", kwargs)))
+    monkeypatch.setattr("muscles_sql.migrations.history", lambda **kwargs: calls.append(("history", kwargs)))
+    monkeypatch.setattr("muscles_sql.migrations.current", lambda **kwargs: calls.append(("current", kwargs)))
+
+    runner = CliRunner()
+    assert runner.invoke(cli_module.main, ["migrate", "revision", "--message", "init"]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "upgrade"]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "downgrade"]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "history"]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "current"]).exit_code == 0
+    assert [name for name, _ in calls] == ["revision", "upgrade", "downgrade", "history", "current"]

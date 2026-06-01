@@ -48,6 +48,55 @@ def migrate_init(target_dir: str):
     click.echo(str(root))
 
 
+@migrate.command("revision")
+@click.option("--dir", "target_dir", default="migrations")
+@click.option("--message", default="revision")
+@click.option("--autogenerate", is_flag=True, default=False)
+def migrate_revision(target_dir: str, message: str, autogenerate: bool):
+    from .migrations import revision
+
+    revision(message=message, target_dir=target_dir, autogenerate=autogenerate)
+    click.echo("ok")
+
+
+@migrate.command("upgrade")
+@click.option("--dir", "target_dir", default="migrations")
+@click.option("--rev", default="head")
+def migrate_upgrade(target_dir: str, rev: str):
+    from .migrations import upgrade
+
+    upgrade(rev=rev, target_dir=target_dir)
+    click.echo("ok")
+
+
+@migrate.command("downgrade")
+@click.option("--dir", "target_dir", default="migrations")
+@click.option("--rev", default="-1")
+def migrate_downgrade(target_dir: str, rev: str):
+    from .migrations import downgrade
+
+    downgrade(rev=rev, target_dir=target_dir)
+    click.echo("ok")
+
+
+@migrate.command("history")
+@click.option("--dir", "target_dir", default="migrations")
+def migrate_history(target_dir: str):
+    from .migrations import history
+
+    history(target_dir=target_dir)
+    click.echo("ok")
+
+
+@migrate.command("current")
+@click.option("--dir", "target_dir", default="migrations")
+def migrate_current(target_dir: str):
+    from .migrations import current
+
+    current(target_dir=target_dir)
+    click.echo("ok")
+
+
 @main.group("generate")
 def generate():
     pass

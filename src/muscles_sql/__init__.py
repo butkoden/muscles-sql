@@ -6,6 +6,9 @@ __all__ = [
     "map_model",
     "SqlRepository",
     "UnitOfWork",
+    "QuerySpec",
+    "FilterClause",
+    "JoinClause",
     "SqlResourceGeneratorProvider",
 ]
 
@@ -31,9 +34,20 @@ def __getattr__(name: str):
         from .uow import UnitOfWork
 
         return UnitOfWork
+    if name == "QuerySpec":
+        from .query import QuerySpec
+
+        return QuerySpec
+    if name == "FilterClause":
+        from .query import FilterClause
+
+        return FilterClause
+    if name == "JoinClause":
+        from .query import JoinClause
+
+        return JoinClause
     if name == "SqlResourceGeneratorProvider":
         from .providers import SqlResourceGeneratorProvider
 
         return SqlResourceGeneratorProvider
     raise AttributeError(name)
-
