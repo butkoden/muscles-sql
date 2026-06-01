@@ -1,27 +1,44 @@
 from typing import Any
 
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, MetaData, Numeric, String, Table, Text
-
-metadata = MetaData()
-
-TYPE_MAP: dict[str, Any] = {
-    "String": String,
-    "Text": Text,
-    "Integer": Integer,
-    "Numeric": Numeric,
-    "Float": Float,
-    "Boolean": Boolean,
-    "Date": Date,
-    "DateTime": DateTime,
+TYPE_MAP: dict[str, str] = {
+    "String": "String",
+    "Text": "Text",
+    "Integer": "Integer",
+    "Numeric": "Numeric",
+    "Float": "Float",
+    "Boolean": "Boolean",
+    "Date": "Date",
+    "DateTime": "DateTime",
 }
 
 
+def _sa():
+    from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, MetaData, Numeric, String, Table, Text
+
+    return {
+        "Boolean": Boolean,
+        "Column": Column,
+        "Date": Date,
+        "DateTime": DateTime,
+        "Float": Float,
+        "Integer": Integer,
+        "MetaData": MetaData,
+        "Numeric": Numeric,
+        "String": String,
+        "Table": Table,
+        "Text": Text,
+    }
+
+
 def _resolve_type(column_type: Any):
+    sa = _sa()
     name = getattr(column_type, "__name__", str(column_type))
-    return TYPE_MAP.get(name, String)
+    return sa.get(TYPE_MAP.get(name, "String"), sa["String"])
 
 
-def map_model(model_cls: type, table_name: str | None = None) -> Table:
+def map_model(model_cls: type, table_name: str | None = None):
+    sa = _sa()
+    metadata = sa["MetaData"]()
     columns = []
     for field_name, field_def in model_cls.__dict__.items():
         if field_name.startswith("_"):
@@ -34,10 +51,10 @@ def map_model(model_cls: type, table_name: str | None = None) -> Table:
         nullable = bool(getattr(field_def, "nullable", not is_pk))
         autoincrement = bool(
             getattr(field_def, "autoincrement", False)
-            or (is_pk and sql_type is Integer)
+            or (is_pk and sql_type is sa["Integer"])
         )
         columns.append(
-            Column(
+            sa["Column"](
                 field_name,
                 sql_type,
                 primary_key=is_pk,
@@ -48,4 +65,4 @@ def map_model(model_cls: type, table_name: str | None = None) -> Table:
 
     if not columns:
         raise ValueError(f"No mappable columns found in model {model_cls.__name__}")
-    return Table(table_name or model_cls.__name__.lower(), metadata, *columns, extend_existing=True)
+    return sa["Table"](table_name or model_cls.__name__.lower(), metadata, *columns, extend_existing=True)

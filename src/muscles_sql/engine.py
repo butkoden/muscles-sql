@@ -1,11 +1,11 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
 from .config import DatabaseConfig
 
 
 class EngineManager:
     def __init__(self, config: DatabaseConfig):
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+
         kwargs = {"echo": config.echo, "future": config.future}
         if not config.url.startswith("sqlite"):
             kwargs["pool_size"] = config.pool_size
