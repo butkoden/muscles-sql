@@ -1,4 +1,6 @@
 from pathlib import Path
+import os
+from typing import Any
 
 
 def init_migrations(target_dir: str = "migrations") -> Path:
@@ -11,6 +13,7 @@ def init_migrations(target_dir: str = "migrations") -> Path:
 
 
 def _ensure_bootstrap_files(root: Path) -> None:
+    root.mkdir(parents=True, exist_ok=True)
     env_py = root / "env.py"
     script_mako = root / "script.py.mako"
     readme = root / "README"
@@ -20,7 +23,7 @@ def _ensure_bootstrap_files(root: Path) -> None:
             "from alembic import context\n"
             "from sqlalchemy import engine_from_config, pool\n\n"
             "config = context.config\n"
-            "target_metadata = None\n\n"
+            "target_metadata = config.attributes.get('target_metadata')\n\n"
             "def run_migrations_offline():\n"
             "    url = config.get_main_option('sqlalchemy.url')\n"
             "    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)\n"
@@ -70,36 +73,60 @@ def _load_alembic():
     return command, Config
 
 
-def _config(target_dir: str = "migrations"):
+def _resolve_url(url: str | None = None) -> str | None:
+    if url:
+        return url
+    env_url = os.getenv("MUSCLES_SQL_URL")
+    if env_url:
+        return env_url
+    return None
+
+
+def _config(target_dir: str = "migrations", url: str | None = None, target_metadata: Any | None = None):
     _, Config = _load_alembic()
     root = Path(target_dir)
     _ensure_bootstrap_files(root)
     cfg = Config()
     cfg.set_main_option("script_location", target_dir)
-    cfg.set_main_option("sqlalchemy.url", "sqlite:///:memory:")
+    resolved_url = _resolve_url(url)
+    if not resolved_url:
+        raise ValueError("Database URL is required for migration commands")
+    cfg.set_main_option("sqlalchemy.url", resolved_url)
+    if target_metadata is not None:
+        cfg.attributes["target_metadata"] = target_metadata
     return cfg
 
 
-def revision(message: str, target_dir: str = "migrations", autogenerate: bool = False) -> None:
+def revision(
+    message: str,
+    target_dir: str = "migrations",
+    autogenerate: bool = False,
+    url: str | None = None,
+    target_metadata: Any | None = None,
+) -> None:
     command, _ = _load_alembic()
-    command.revision(_config(target_dir), message=message, autogenerate=autogenerate)
+    command.revision(
+        _config(target_dir, url=url, target_metadata=target_metadata),
+        message=message,
+        autogenerate=autogenerate,
+    )
 
 
-def upgrade(rev: str = "head", target_dir: str = "migrations") -> None:
+def upgrade(rev: str = "head", target_dir: str = "migrations", url: str | None = None) -> None:
     command, _ = _load_alembic()
-    command.upgrade(_config(target_dir), rev)
+    command.upgrade(_config(target_dir, url=url), rev)
 
 
-def downgrade(rev: str = "-1", target_dir: str = "migrations") -> None:
+def downgrade(rev: str = "-1", target_dir: str = "migrations", url: str | None = None) -> None:
     command, _ = _load_alembic()
-    command.downgrade(_config(target_dir), rev)
+    command.downgrade(_config(target_dir, url=url), rev)
 
 
-def history(target_dir: str = "migrations") -> None:
+def history(target_dir: str = "migrations", url: str | None = None) -> None:
     command, _ = _load_alembic()
-    command.history(_config(target_dir))
+    command.history(_config(target_dir, url=url))
 
 
-def current(target_dir: str = "migrations") -> None:
+def current(target_dir: str = "migrations", url: str | None = None) -> None:
     command, _ = _load_alembic()
-    command.current(_config(target_dir))
+    command.current(_config(target_dir, url=url))

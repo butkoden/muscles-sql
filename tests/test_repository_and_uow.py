@@ -1,3 +1,5 @@
+import pytest
+
 from sqlalchemy import Column, ForeignKey, Integer, MetaData, String, Table, func
 
 from muscles_sql.config import DatabaseConfig
@@ -112,11 +114,8 @@ def test_repository_upsert_fallback_uses_conflict_fields():
     with UnitOfWork(manager.session_factory) as uow:
         repo = SqlRepository(uow.session, table)
         repo.create({"id": 1, "name": "Denis"})
-        # conflict is on name (non-PK). Fallback path should update existing row.
-        repo.upsert({"id": 2, "name": "Denis"}, conflict_fields=["name"])
-        rows = repo.find({"name": "Denis"}, limit=10)
-        assert len(rows) == 1
-        assert rows[0]["id"] == 1
+        with pytest.raises(ValueError, match="PRIMARY KEY or UNIQUE constraint"):
+            repo.upsert({"id": 2, "name": "Denis"}, conflict_fields=["name"])
 
 
 def test_uow_nested_transaction_and_retry():

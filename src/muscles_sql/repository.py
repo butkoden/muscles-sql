@@ -120,6 +120,11 @@ class SqlRepository:
         from sqlalchemy.dialects.sqlite import insert as sqlite_insert
         from sqlalchemy.exc import OperationalError
 
+        if not self._has_unique_conflict_constraint(conflict_fields):
+            raise ValueError(
+                "conflict_fields must match a PRIMARY KEY or UNIQUE constraint for safe upsert fallback"
+            )
+
         dialect_name = inspect(self.session.bind).dialect.name
         if dialect_name == "sqlite":
             stmt = sqlite_insert(self.table).values(**row)
@@ -146,6 +151,27 @@ class SqlRepository:
             return self.update(pk_val, {k: v for k, v in row.items() if k != pk_col})
         self.create(row)
         return 1
+
+    def _has_unique_conflict_constraint(self, conflict_fields: list[str]) -> bool:
+        if not conflict_fields:
+            return False
+        conflict_set = set(conflict_fields)
+        pk_cols = {column.name for column in self.table.primary_key.columns}
+        if conflict_set == pk_cols:
+            return True
+
+        for constraint in getattr(self.table, "constraints", []):
+            columns = getattr(constraint, "columns", None)
+            if columns is None:
+                continue
+            if getattr(constraint, "unique", False) and {column.name for column in columns} == conflict_set:
+                return True
+
+        for index in getattr(self.table, "indexes", []):
+            if getattr(index, "unique", False) and {column.name for column in index.columns} == conflict_set:
+                return True
+
+        return False
 
     def _build_select(self, spec: QuerySpec):
         from sqlalchemy import and_, or_, select

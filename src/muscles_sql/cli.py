@@ -52,48 +52,53 @@ def migrate_init(target_dir: str):
 @click.option("--dir", "target_dir", default="migrations")
 @click.option("--message", default="revision")
 @click.option("--autogenerate", is_flag=True, default=False)
-def migrate_revision(target_dir: str, message: str, autogenerate: bool):
+@click.option("--url", default=None)
+def migrate_revision(target_dir: str, message: str, autogenerate: bool, url: str | None):
     from .migrations import revision
 
-    revision(message=message, target_dir=target_dir, autogenerate=autogenerate)
+    revision(message=message, target_dir=target_dir, autogenerate=autogenerate, url=url)
     click.echo("ok")
 
 
 @migrate.command("upgrade")
 @click.option("--dir", "target_dir", default="migrations")
 @click.option("--rev", default="head")
-def migrate_upgrade(target_dir: str, rev: str):
+@click.option("--url", default=None)
+def migrate_upgrade(target_dir: str, rev: str, url: str | None):
     from .migrations import upgrade
 
-    upgrade(rev=rev, target_dir=target_dir)
+    upgrade(rev=rev, target_dir=target_dir, url=url)
     click.echo("ok")
 
 
 @migrate.command("downgrade")
 @click.option("--dir", "target_dir", default="migrations")
 @click.option("--rev", default="-1")
-def migrate_downgrade(target_dir: str, rev: str):
+@click.option("--url", default=None)
+def migrate_downgrade(target_dir: str, rev: str, url: str | None):
     from .migrations import downgrade
 
-    downgrade(rev=rev, target_dir=target_dir)
+    downgrade(rev=rev, target_dir=target_dir, url=url)
     click.echo("ok")
 
 
 @migrate.command("history")
 @click.option("--dir", "target_dir", default="migrations")
-def migrate_history(target_dir: str):
+@click.option("--url", default=None)
+def migrate_history(target_dir: str, url: str | None):
     from .migrations import history
 
-    history(target_dir=target_dir)
+    history(target_dir=target_dir, url=url)
     click.echo("ok")
 
 
 @migrate.command("current")
 @click.option("--dir", "target_dir", default="migrations")
-def migrate_current(target_dir: str):
+@click.option("--url", default=None)
+def migrate_current(target_dir: str, url: str | None):
     from .migrations import current
 
-    current(target_dir=target_dir)
+    current(target_dir=target_dir, url=url)
     click.echo("ok")
 
 

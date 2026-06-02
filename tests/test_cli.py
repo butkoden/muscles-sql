@@ -41,9 +41,11 @@ def test_migrate_v2_commands(monkeypatch):
     monkeypatch.setattr("muscles_sql.migrations.current", lambda **kwargs: calls.append(("current", kwargs)))
 
     runner = CliRunner()
-    assert runner.invoke(cli_module.main, ["migrate", "revision", "--message", "init"]).exit_code == 0
-    assert runner.invoke(cli_module.main, ["migrate", "upgrade"]).exit_code == 0
-    assert runner.invoke(cli_module.main, ["migrate", "downgrade"]).exit_code == 0
-    assert runner.invoke(cli_module.main, ["migrate", "history"]).exit_code == 0
-    assert runner.invoke(cli_module.main, ["migrate", "current"]).exit_code == 0
+    url = "sqlite:///./app.db"
+    assert runner.invoke(cli_module.main, ["migrate", "revision", "--message", "init", "--url", url]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "upgrade", "--url", url]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "downgrade", "--url", url]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "history", "--url", url]).exit_code == 0
+    assert runner.invoke(cli_module.main, ["migrate", "current", "--url", url]).exit_code == 0
     assert [name for name, _ in calls] == ["revision", "upgrade", "downgrade", "history", "current"]
+    assert all(call_kwargs["url"] == url for _, call_kwargs in calls)
