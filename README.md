@@ -8,6 +8,14 @@ Muscles SQL is a data layer package for SQL databases:
 - migrations v2 commands (Alembic-compatible lazy-load)
 - inspect/doctor support with machine-readable diagnostics
 
+## Related Repositories
+
+- [`muscles`](https://github.com/butkoden/muscles) - core schemas, actions, DI and canonical documentation.
+- [`muscles-documents`](https://github.com/butkoden/muscles-documents) - document metadata/state can use SQL persistence in applications.
+- [`muscles-ai`](https://github.com/butkoden/muscles-ai) - AI/RAG flows can use SQL-backed application state without making SQL generic storage.
+- [`muscles-otel`](https://github.com/butkoden/muscles-otel) - observability hooks around SQL-backed flows.
+- [`muscles-benchmarks`](https://github.com/butkoden/muscles-benchmarks) - SQL transaction and mapping regression checks.
+
 ## Quickstart
 
 ```bash
