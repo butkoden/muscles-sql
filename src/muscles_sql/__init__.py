@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .config import DatabaseConfig
+    from .config import SqlConnectionConfig
+    from .connections import SqlConnectionRegistry, UnknownSqlConnection
     from .engine import EngineManager
     from .mapping import map_model
     from .providers import SqlResourceGeneratorProvider
@@ -13,6 +15,9 @@ if TYPE_CHECKING:
 
 __all__ = [
     "DatabaseConfig",
+    "SqlConnectionConfig",
+    "SqlConnectionRegistry",
+    "UnknownSqlConnection",
     "EngineManager",
     "map_model",
     "SqlRepository",
@@ -29,6 +34,18 @@ def __getattr__(name: str):
         from .config import DatabaseConfig
 
         return DatabaseConfig
+    if name == "SqlConnectionConfig":
+        from .config import SqlConnectionConfig
+
+        return SqlConnectionConfig
+    if name == "SqlConnectionRegistry":
+        from .connections import SqlConnectionRegistry
+
+        return SqlConnectionRegistry
+    if name == "UnknownSqlConnection":
+        from .connections import UnknownSqlConnection
+
+        return UnknownSqlConnection
     if name == "EngineManager":
         from .engine import EngineManager
 

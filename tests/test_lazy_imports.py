@@ -25,6 +25,8 @@ def test_public_exports_are_importable():
     from muscles_sql import FilterClause
     from muscles_sql import JoinClause
     from muscles_sql import QuerySpec
+    from muscles_sql import SqlConnectionConfig
+    from muscles_sql import SqlConnectionRegistry
     from muscles_sql import SqlRepository
     from muscles_sql import UnitOfWork
     from muscles_sql import map_model
@@ -34,6 +36,8 @@ def test_public_exports_are_importable():
     assert FilterClause.__name__ == "FilterClause"
     assert JoinClause.__name__ == "JoinClause"
     assert QuerySpec.__name__ == "QuerySpec"
+    assert SqlConnectionConfig.__name__ == "SqlConnectionConfig"
+    assert SqlConnectionRegistry.__name__ == "SqlConnectionRegistry"
     assert SqlRepository.__name__ == "SqlRepository"
     assert UnitOfWork.__name__ == "UnitOfWork"
     assert callable(map_model)

@@ -18,6 +18,44 @@ pytest -q
 muscles-sql doctor --url sqlite:///./app.db
 ```
 
+## Named SQL Connections
+
+`muscles-sql` can manage multiple SQL connections without becoming a generic
+storage registry. The registry is SQL-only: it owns SQL connection configs,
+lazy SQLAlchemy `EngineManager` instances, sessions, inspect and doctor reports.
+
+```python
+from muscles_sql import SqlConnectionConfig, SqlConnectionRegistry
+
+registry = SqlConnectionRegistry(
+    [
+        SqlConnectionConfig(name="default", url="sqlite:///./app.db"),
+        SqlConnectionConfig(name="analytics", url="sqlite:///./analytics.db", role="read"),
+    ]
+)
+
+session = registry.session("analytics")
+report = registry.inspect("analytics")
+```
+
+CLI diagnostics can read a JSON config:
+
+```json
+{
+  "connections": {
+    "default": "sqlite:///./app.db",
+    "analytics": {"url": "sqlite:///./analytics.db", "role": "read"}
+  }
+}
+```
+
+```bash
+muscles-sql inspect --config sql-connections.json --connection analytics
+muscles-sql doctor --config sql-connections.json --all
+```
+
+Diagnostic output uses safe URLs and does not print passwords from DSNs.
+
 ## Advanced Query Example
 
 ```python
