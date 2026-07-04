@@ -142,6 +142,16 @@ def test_uow_nested_transaction_and_retry():
         assert attempts["count"] == 2
 
 
+def test_uow_requires_active_session_for_transaction_helpers():
+    uow = UnitOfWork(lambda: None)
+
+    with pytest.raises(RuntimeError, match="active session"):
+        uow.begin_nested()
+
+    with pytest.raises(RuntimeError, match="active session"):
+        uow.with_retry(lambda session: session)
+
+
 def test_repository_queryspec_filter_operators():
     manager = EngineManager(DatabaseConfig(url="sqlite:///:memory:"))
     table, metadata = _users_table()

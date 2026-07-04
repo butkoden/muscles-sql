@@ -1,3 +1,5 @@
+from typing import Any
+
 from .config import DatabaseConfig
 
 
@@ -6,7 +8,7 @@ class EngineManager:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
 
-        kwargs = {"echo": config.echo, "future": config.future}
+        kwargs: dict[str, Any] = {"echo": config.echo, "future": config.future}
         if not config.url.startswith("sqlite"):
             kwargs["pool_size"] = config.pool_size
             kwargs["max_overflow"] = config.max_overflow
