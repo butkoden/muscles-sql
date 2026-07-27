@@ -18,6 +18,18 @@ dependencies = [
   "pydantic>=2.7,<3.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/butkoden/muscles-sql"
+Repository = "https://github.com/butkoden/muscles-sql"
+Documentation = "https://github.com/butkoden/muscles-sql#readme"
+PyPI = "https://pypi.org/project/muscles-sql/"
+Releases = "https://github.com/butkoden/muscles-sql/releases"
+"muscles" = "https://pypi.org/project/muscles/"
+"muscles-documents" = "https://pypi.org/project/muscles-documents/"
+"muscles-ai" = "https://pypi.org/project/muscles-ai/"
+"muscles-otel" = "https://pypi.org/project/muscles-otel/"
+"muscles-benchmarks" = "https://pypi.org/project/muscles-benchmarks/"
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0,<9.0",
