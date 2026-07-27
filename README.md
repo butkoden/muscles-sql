@@ -21,6 +21,12 @@ Muscles SQL is a data layer package for SQL databases:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
+pip install muscles-sql
+```
+
+For local development with the test dependencies:
+
+```bash
 pip install -e ".[dev]"
 pytest -q
 muscles-sql doctor --url sqlite:///./app.db
