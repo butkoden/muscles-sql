@@ -142,6 +142,22 @@ def test_uow_nested_transaction_and_retry():
         assert attempts["count"] == 2
 
 
+def test_uow_rolls_back_failed_business_unit_and_releases_session():
+    manager = EngineManager(DatabaseConfig(url="sqlite:///:memory:"))
+    table, metadata = _users_table()
+    metadata.create_all(manager.engine)
+
+    uow = UnitOfWork(manager.session_factory)
+    with pytest.raises(RuntimeError, match="business failure"):
+        with uow:
+            SqlRepository(uow.session, table).create({"id": 1, "name": "Not committed"})
+            raise RuntimeError("business failure")
+
+    assert uow.session is None
+    with UnitOfWork(manager.session_factory) as check:
+        assert SqlRepository(check.session, table).get(1) is None
+
+
 def test_uow_requires_active_session_for_transaction_helpers():
     uow = UnitOfWork(lambda: None)
 
